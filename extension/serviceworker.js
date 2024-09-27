@@ -1,6 +1,4 @@
-async function main() {
-    logd("Service worker");
-
+async function maybeScheduleAlarm() {
     const existingAlarm = await chrome.alarms.get("myAlarm");
     if (existingAlarm) {
         logd("Alarm is already scheduled: ignore");
@@ -8,11 +6,6 @@ async function main() {
         logd("Scheduling alarm");
         await chrome.alarms.create("myAlarm", { periodInMinutes: 1, delayInMinutes: 1 });
     }
-
-    chrome.alarms.onAlarm.addListener(async (alarm) => {
-        logd("Alarm triggered");
-        await executeHttpCall();
-    });
 }
 
 async function executeHttpCall() {
@@ -35,4 +28,11 @@ function logd(message) {
     console.log(`${(new Date()).toLocaleString()} - ${message}`);
 }
 
-main();
+logd("Service worker started");
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    logd("Alarm triggered");
+    await executeHttpCall();
+});
+
+maybeScheduleAlarm();
